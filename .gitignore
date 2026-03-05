@@ -1,0 +1,49 @@
+# Xcode
+*.xcodeproj/project.xcworkspace/
+*.xcodeproj/xcuserdata/
+*.xcworkspace/
+xcuserdata/
+DerivedData/
+build/
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+*.moved-aside
+*.hmap
+*.ipa
+*.xcuserstate
+*.xccheckout
+*.xcscmblueprint
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# CocoaPods
+Pods/
+
+# Swift Package Manager
+.build/
+.swiftpm/
+Package.resolved
+
+# Temporary files
+*.swp
+*.lock
+*~
+\#*\#
+
+# IDE
+.idea/
+*.sublime-*
+.vscode/
+
+# Secrets (ne jamais committer)
+*.env
+secrets/
+credentials/

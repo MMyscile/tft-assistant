@@ -1,0 +1,60 @@
+{
+  "dataVersion": "Set13_Patch14.1",
+  "components": [
+    "BFSword",
+    "RecurveBow",
+    "NeedlesslyLargeRod",
+    "TearOfTheGoddess",
+    "ChainVest",
+    "NegatronCloak",
+    "GiantsBelt",
+    "SparringGloves",
+    "Spatula"
+  ],
+  "recipes": {
+    "Bloodthirster": ["BFSword", "NegatronCloak"],
+    "Deathblade": ["BFSword", "BFSword"],
+    "GiantSlayer": ["BFSword", "RecurveBow"],
+    "GuardianAngel": ["BFSword", "ChainVest"],
+    "HextechGunblade": ["BFSword", "NeedlesslyLargeRod"],
+    "InfinityEdge": ["BFSword", "SparringGloves"],
+    "SpearOfShojin": ["BFSword", "TearOfTheGoddess"],
+    "Zephyr": ["BFSword", "GiantsBelt"],
+    "BladeOfTheRuinedKing": ["BFSword", "Spatula"],
+
+    "LastWhisper": ["RecurveBow", "SparringGloves"],
+    "TitansResolve": ["RecurveBow", "ChainVest"],
+    "Rageblade": ["RecurveBow", "NeedlesslyLargeRod"],
+    "StatikkShiv": ["RecurveBow", "TearOfTheGoddess"],
+    "RunaansHurricane": ["RecurveBow", "NegatronCloak"],
+    "ZekesHerald": ["RecurveBow", "GiantsBelt"],
+    "RedBuff": ["RecurveBow", "RecurveBow"],
+
+    "JeweledGauntlet": ["NeedlesslyLargeRod", "SparringGloves"],
+    "RabadonsDeathcap": ["NeedlesslyLargeRod", "NeedlesslyLargeRod"],
+    "ArchangelsStaff": ["NeedlesslyLargeRod", "TearOfTheGoddess"],
+    "IonicSpark": ["NeedlesslyLargeRod", "NegatronCloak"],
+    "Morellonomicon": ["NeedlesslyLargeRod", "GiantsBelt"],
+    "GiantsBelt": ["NeedlesslyLargeRod", "ChainVest"],
+
+    "BlueBuff": ["TearOfTheGoddess", "TearOfTheGoddess"],
+    "HandOfJustice": ["TearOfTheGoddess", "SparringGloves"],
+    "Redemption": ["TearOfTheGoddess", "GiantsBelt"],
+    "ChaliceOfPower": ["TearOfTheGoddess", "NegatronCloak"],
+    "FrozenHeart": ["TearOfTheGoddess", "ChainVest"],
+
+    "BrambleVest": ["ChainVest", "ChainVest"],
+    "Gargoyle": ["ChainVest", "NegatronCloak"],
+    "SunfireCape": ["ChainVest", "GiantsBelt"],
+    "ShroudOfStillness": ["ChainVest", "SparringGloves"],
+
+    "DragonsClaw": ["NegatronCloak", "NegatronCloak"],
+    "Quicksilver": ["NegatronCloak", "SparringGloves"],
+    "ZzRotPortal": ["NegatronCloak", "GiantsBelt"],
+
+    "Warmogs": ["GiantsBelt", "GiantsBelt"],
+    "Evenshroud": ["GiantsBelt", "SparringGloves"],
+
+    "ThiefsGloves": ["SparringGloves", "SparringGloves"]
+  }
+}

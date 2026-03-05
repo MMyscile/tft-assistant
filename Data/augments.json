@@ -1,0 +1,16 @@
+{
+  "dataVersion": "Set13_Patch14.1",
+  "augments": [
+    {"id": "TFT_Augment_BuriedTreasures", "name": "Buried Treasures", "tier": "silver"},
+    {"id": "TFT_Augment_ComponentGrabBag", "name": "Component Grab Bag", "tier": "silver"},
+    {"id": "TFT_Augment_PandorasItems", "name": "Pandora's Items", "tier": "gold"},
+    {"id": "TFT_Augment_LevelUp", "name": "Level Up!", "tier": "silver"},
+    {"id": "TFT_Augment_ThinkFast", "name": "Think Fast", "tier": "silver"},
+    {"id": "TFT_Augment_TinyTitans", "name": "Tiny Titans", "tier": "silver"},
+    {"id": "TFT_Augment_TradesSector", "name": "Trade Sector", "tier": "gold"},
+    {"id": "TFT_Augment_RichGetRicher", "name": "Rich Get Richer", "tier": "gold"},
+    {"id": "TFT_Augment_HighRoller", "name": "High Roller", "tier": "gold"},
+    {"id": "TFT_Augment_GoldReserves", "name": "Gold Reserves", "tier": "prismatic"}
+  ],
+  "note": "Liste placeholder - à compléter avec tous les augments du set actuel"
+}

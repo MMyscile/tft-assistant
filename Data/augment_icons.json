@@ -1,0 +1,16 @@
+{
+  "dataVersion": "Set13_Patch14.1",
+  "mapping": {
+    "TFT_Augment_BuriedTreasures": "buried_treasures.png",
+    "TFT_Augment_ComponentGrabBag": "component_grab_bag.png",
+    "TFT_Augment_PandorasItems": "pandoras_items.png",
+    "TFT_Augment_LevelUp": "level_up.png",
+    "TFT_Augment_ThinkFast": "think_fast.png",
+    "TFT_Augment_TinyTitans": "tiny_titans.png",
+    "TFT_Augment_TradesSector": "trade_sector.png",
+    "TFT_Augment_RichGetRicher": "rich_get_richer.png",
+    "TFT_Augment_HighRoller": "high_roller.png",
+    "TFT_Augment_GoldReserves": "gold_reserves.png"
+  },
+  "note": "Placer les fichiers PNG correspondants dans Assets/Templates/Augments/"
+}
