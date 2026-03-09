@@ -36,15 +36,15 @@ class CalibrationStore: ObservableObject {
             let data = try Data(contentsOf: fileURL)
             let decoded = try JSONDecoder().decode(CalibrationData.self, from: data)
 
-            // Vérifier la version
-            if decoded.version == CalibrationData.currentVersion {
-                self.calibration = decoded
-                self.isCalibrated = decoded.isValid
-                print("[Calibration] Loaded calibration from \(decoded.calibrationDate)")
+            // Charger et migrer si nécessaire (le init(from:) gère la migration)
+            self.calibration = decoded
+            self.isCalibrated = decoded.isValid
+
+            if decoded.version < CalibrationData.currentVersion {
+                print("[Calibration] Migrated from v\(decoded.version) to v\(CalibrationData.currentVersion)")
+                save()  // Sauvegarder la version migrée
             } else {
-                print("[Calibration] Outdated version, resetting")
-                self.calibration = .empty
-                self.isCalibrated = false
+                print("[Calibration] Loaded calibration from \(decoded.calibrationDate)")
             }
         } catch {
             print("[Calibration] Failed to load: \(error.localizedDescription)")
@@ -102,6 +102,23 @@ class CalibrationStore: ObservableObject {
         case .items:
             return calibration.itemsZone
         }
+    }
+
+    // MARK: - Item Slots
+
+    func updateItemSlots(_ config: ItemSlotsConfig) {
+        calibration.itemSlots = config
+        isCalibrated = calibration.isValid
+        save()
+        print("[Calibration] Updated item slots config (valid: \(config.isValid))")
+    }
+
+    func getItemSlotRects(for imageSize: CGSize) -> [CGRect] {
+        return calibration.itemSlots.getSlotCGRects(for: imageSize)
+    }
+
+    var hasItemSlots: Bool {
+        return calibration.itemSlots.isValid
     }
 
     // MARK: - Reset

@@ -38,9 +38,13 @@ class ItemDetector: ObservableObject {
 
     // MARK: - Process
 
+    private var hasItemsCalibration: Bool {
+        CalibrationStore.shared.hasItemSlots || CalibrationStore.shared.calibration.itemsZone.isValid
+    }
+
     private func processImageIfNeeded(_ fullImage: NSImage) {
-        // Vérifier si calibré
-        guard CalibrationStore.shared.calibration.itemsZone.isValid else { return }
+        // Vérifier si calibré (nouveau système slots OU ancien système zone)
+        guard hasItemsCalibration else { return }
 
         // Throttle
         if let lastDate = lastProcessDate,
@@ -66,7 +70,69 @@ class ItemDetector: ObservableObject {
             lastProcessTime = Date().timeIntervalSince(startTime)
         }
 
-        // Cropper la zone items
+        // Utiliser le nouveau système de slots si disponible
+        if CalibrationStore.shared.hasItemSlots {
+            await processWithSlots(fullImage)
+        } else {
+            await processWithZone(fullImage)
+        }
+    }
+
+    // MARK: - Nouveau système: slots individuels
+
+    private func processWithSlots(_ fullImage: NSImage) async {
+        guard let cgImage = fullImage.cgImage(forProposedRect: nil, context: nil, hints: nil) else {
+            print("[ItemDetector] Failed to get CGImage")
+            return
+        }
+
+        let imageSize = CGSize(width: cgImage.width, height: cgImage.height)
+        let slotRects = CalibrationStore.shared.getItemSlotRects(for: imageSize)
+
+        print("[ItemDetector] Processing \(slotRects.count) slots (image: \(Int(imageSize.width))x\(Int(imageSize.height)))")
+
+        var allMatches: [TemplateMatch] = []
+
+        for (index, rect) in slotRects.enumerated() {
+            // Vérifier les limites
+            guard rect.width > 0 && rect.height > 0 &&
+                  rect.origin.x >= 0 && rect.origin.y >= 0 &&
+                  rect.maxX <= CGFloat(cgImage.width) &&
+                  rect.maxY <= CGFloat(cgImage.height) else {
+                print("[ItemDetector] Slot \(index) hors limites: \(rect)")
+                continue
+            }
+
+            // Cropper le slot
+            guard let croppedCG = cgImage.cropping(to: rect) else {
+                continue
+            }
+
+            let slotImage = NSImage(cgImage: croppedCG, size: NSSize(width: croppedCG.width, height: croppedCG.height))
+
+            // Détecter l'item dans ce slot
+            let matches = await Task.detached(priority: .userInitiated) {
+                TemplateMatcher.shared.findItems(in: slotImage, maxResults: 1)
+            }.value
+
+            if let bestMatch = matches.first {
+                print("[ItemDetector] Slot \(index): \(bestMatch.itemName) (\(Int(bestMatch.confidence * 100))%)")
+                allMatches.append(bestMatch)
+            }
+        }
+
+        self.detectedItems = allMatches
+
+        if allMatches.isEmpty {
+            print("[ItemDetector] No items found in any slot")
+        } else {
+            print("[ItemDetector] Found \(allMatches.count) items total")
+        }
+    }
+
+    // MARK: - Ancien système: zone rectangulaire
+
+    private func processWithZone(_ fullImage: NSImage) async {
         let calibration = CalibrationStore.shared.calibration
         guard let itemsImage = RegionCropper.shared.crop(
             image: fullImage,

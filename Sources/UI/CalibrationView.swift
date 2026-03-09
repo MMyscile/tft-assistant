@@ -32,7 +32,8 @@ struct CalibrationView: View {
 
             // Boutons de sélection pour chaque zone
             VStack(spacing: 16) {
-                ForEach(CalibrationZoneType.allCases) { zone in
+                // Stage et Augments (système classique)
+                ForEach([CalibrationZoneType.stage, CalibrationZoneType.augments], id: \.self) { zone in
                     HStack {
                         Circle()
                             .fill(colorForZone(zone))
@@ -65,6 +66,42 @@ struct CalibrationView: View {
                     }
                     .padding(.horizontal)
                 }
+
+                Divider()
+                    .padding(.horizontal)
+
+                // Items (nouveau système avec 10 slots)
+                HStack {
+                    Circle()
+                        .fill(Color.orange)
+                        .frame(width: 14, height: 14)
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Items (10 slots)")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                        Text("Calibrer les 10 emplacements d'items")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                            .lineLimit(1)
+                    }
+                    .frame(width: 160, alignment: .leading)
+
+                    Spacer()
+
+                    if calibrationStore.hasItemSlots {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(.green)
+                            .font(.title3)
+                    }
+
+                    Button(calibrationStore.hasItemSlots ? "Redéfinir" : "Définir") {
+                        startItemSlotsSelection()
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.orange)
+                }
+                .padding(.horizontal)
             }
             .padding(.vertical, 20)
 
@@ -98,7 +135,7 @@ struct CalibrationView: View {
                 let count = [
                     calibrationStore.calibration.stageZone.isValid,
                     calibrationStore.calibration.augmentsZone.isValid,
-                    calibrationStore.calibration.itemsZone.isValid
+                    calibrationStore.calibration.hasItemSlots
                 ].filter { $0 }.count
 
                 Text("\(count)/3 zones définies")
@@ -135,6 +172,16 @@ struct CalibrationView: View {
         // Lancer la sélection après un court délai
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
             ScreenCalibrationManager.shared.startSelection(for: zone)
+        }
+    }
+
+    private func startItemSlotsSelection() {
+        // Fermer temporairement
+        dismiss()
+
+        // Lancer la calibration des slots
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            ScreenCalibrationManager.shared.startItemSlotsSelection()
         }
     }
 

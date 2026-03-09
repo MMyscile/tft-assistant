@@ -144,17 +144,20 @@ class ScreenCaptureManager: NSObject, ObservableObject {
 
             let fps = SettingsManager.shared.captureFPS
 
-            // Stocker les dimensions pour la calibration
-            // On utilise la taille en points (comme NSScreen) pour cohérence
-            let screenScale = NSScreen.main?.backingScaleFactor ?? 2.0
-            let captureW = Int(Double(display.width) / screenScale)
-            let captureH = Int(Double(display.height) / screenScale)
+            // display.width/height sont en POINTS (1512×982 sur Retina)
+            // Pour capturer en résolution NATIVE (pixels), multiplier par le scale factor
+            // Ref: https://developer.apple.com/documentation/appkit/nsscreen/1388385-backingscalefactor
+            let scaleFactor = Int(NSScreen.main?.backingScaleFactor ?? 2.0)
+            let captureW = display.width * scaleFactor
+            let captureH = display.height * scaleFactor
             self.captureWidth = captureW
             self.captureHeight = captureH
 
-            print("[Capture] Starting continuous capture at \(fps) fps on display: \(display.width)x\(display.height) (scaled: \(captureW)x\(captureH))")
+            print("[Capture] Starting continuous capture at \(fps) fps")
+            print("[Capture] Display: \(display.width)x\(display.height) points, scale: \(scaleFactor)x")
+            print("[Capture] Capture resolution: \(captureW)x\(captureH) pixels (native)")
 
-            // Configuration - capturer en résolution réduite (points, pas pixels)
+            // Configuration - capturer à la résolution NATIVE (pixels)
             let filter = SCContentFilter(display: display, excludingWindows: [])
             let config = SCStreamConfiguration()
             config.width = captureW

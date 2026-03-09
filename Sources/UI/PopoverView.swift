@@ -446,11 +446,17 @@ struct SettingsTabView: View {
 struct ItemsTabView: View {
     @ObservedObject private var itemDetector = ItemDetector.shared
     @ObservedObject private var calibrationStore = CalibrationStore.shared
+    @ObservedObject private var captureManager = ScreenCaptureManager.shared
     @ObservedObject private var settings = SettingsManager.shared
+    @State private var debugMessage: String?
+
+    private var isItemsCalibrated: Bool {
+        calibrationStore.hasItemSlots || calibrationStore.calibration.itemsZone.isValid
+    }
 
     var body: some View {
         VStack(spacing: 12) {
-            if !calibrationStore.calibration.itemsZone.isValid {
+            if !isItemsCalibrated {
                 // Zone items pas calibrée
                 VStack(spacing: 8) {
                     Image(systemName: "exclamationmark.triangle")
@@ -458,7 +464,7 @@ struct ItemsTabView: View {
                         .foregroundColor(.orange)
                     Text("Calibration requise")
                         .font(.headline)
-                    Text("Configure la zone Items dans Settings")
+                    Text("Configure les slots Items dans Settings")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
@@ -526,6 +532,26 @@ struct ItemsTabView: View {
                         Text("Process time: \(String(format: "%.0fms", itemDetector.lastProcessTime * 1000))")
                             .font(.caption2)
                             .foregroundColor(.secondary)
+                        Text("Slots calibrés: \(calibrationStore.hasItemSlots ? "Oui" : "Non")")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+
+                        // Bouton capture debug
+                        Button(action: captureDebugSlots) {
+                            HStack {
+                                Image(systemName: "camera.fill")
+                                Text("Capturer slots → Bureau")
+                            }
+                            .font(.caption)
+                        }
+                        .buttonStyle(.bordered)
+                        .padding(.top, 4)
+
+                        if let message = debugMessage {
+                            Text(message)
+                                .font(.caption2)
+                                .foregroundColor(.green)
+                        }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(8)
@@ -535,6 +561,77 @@ struct ItemsTabView: View {
             }
         }
         .padding()
+    }
+
+    // MARK: - Debug Capture
+
+    private func captureDebugSlots() {
+        guard let image = captureManager.lastCapturedImage else {
+            debugMessage = "Pas d'image capturée"
+            return
+        }
+
+        guard calibrationStore.hasItemSlots else {
+            debugMessage = "Slots non calibrés"
+            return
+        }
+
+        // Créer le dossier de debug
+        let desktopURL = FileManager.default.urls(for: .desktopDirectory, in: .userDomainMask).first!
+        let debugFolder = desktopURL.appendingPathComponent("TFT_Debug", isDirectory: true)
+        try? FileManager.default.createDirectory(at: debugFolder, withIntermediateDirectories: true)
+
+        // Obtenir la taille réelle de l'image (en pixels, pas en points)
+        guard let cgImage = image.cgImage(forProposedRect: nil, context: nil, hints: nil) else {
+            debugMessage = "Erreur: impossible d'obtenir CGImage"
+            return
+        }
+
+        let imageSize = CGSize(width: cgImage.width, height: cgImage.height)
+        let slotRects = calibrationStore.getItemSlotRects(for: imageSize)
+
+        // Debug détaillé
+        let config = calibrationStore.calibration.itemSlots
+        print("[Debug] ==================")
+        print("[Debug] Image size: \(imageSize)")
+        print("[Debug] Slot config: size=\(config.slotSize), spacing=\(config.spacing)")
+        print("[Debug] Expected slot size: \(config.slotSize * imageSize.height)px")
+        print("[Debug] Slot rects count: \(slotRects.count)")
+
+        var savedCount = 0
+        let timestamp = Int(Date().timeIntervalSince1970)
+
+        for (index, rect) in slotRects.enumerated() {
+            print("[Debug] Slot \(index): \(rect)")
+
+            // Vérifier que le rect est valide
+            guard rect.width > 0 && rect.height > 0 &&
+                  rect.origin.x >= 0 && rect.origin.y >= 0 &&
+                  rect.maxX <= CGFloat(cgImage.width) &&
+                  rect.maxY <= CGFloat(cgImage.height) else {
+                print("[Debug] Slot \(index) hors limites!")
+                continue
+            }
+
+            // Cropper le slot
+            if let croppedCG = cgImage.cropping(to: rect) {
+                let slotImage = NSImage(cgImage: croppedCG, size: NSSize(width: croppedCG.width, height: croppedCG.height))
+
+                // Sauvegarder en PNG
+                let filename = "slot_\(index)_\(timestamp).png"
+                let fileURL = debugFolder.appendingPathComponent(filename)
+
+                if let tiffData = slotImage.tiffRepresentation,
+                   let bitmap = NSBitmapImageRep(data: tiffData),
+                   let pngData = bitmap.representation(using: .png, properties: [:]) {
+                    try? pngData.write(to: fileURL)
+                    savedCount += 1
+                }
+            }
+        }
+
+        debugMessage = "\(savedCount) slots → ~/Desktop/TFT_Debug/"
+        print("[Debug] Saved \(savedCount) slot images to \(debugFolder.path)")
     }
 }
 
