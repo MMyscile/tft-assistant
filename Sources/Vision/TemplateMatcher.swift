@@ -22,6 +22,29 @@ class TemplateMatcher {
 
     // MARK: - Load Templates
 
+    /// Crop le centre d'une image (utilisé au chargement des templates)
+    private func cropCenterForTemplate(_ image: NSImage, factor: CGFloat) -> NSImage? {
+        guard let cgImage = image.cgImage(forProposedRect: nil, context: nil, hints: nil) else {
+            return nil
+        }
+
+        let width = CGFloat(cgImage.width)
+        let height = CGFloat(cgImage.height)
+
+        let cropWidth = width * factor
+        let cropHeight = height * factor
+        let x = (width - cropWidth) / 2
+        let y = (height - cropHeight) / 2
+
+        let cropRect = CGRect(x: x, y: y, width: cropWidth, height: cropHeight)
+
+        guard let croppedCG = cgImage.cropping(to: cropRect) else {
+            return nil
+        }
+
+        return NSImage(cgImage: croppedCG, size: NSSize(width: croppedCG.width, height: croppedCG.height))
+    }
+
     private func loadTemplates() {
         let bundle = Bundle.main
         let itemsPath = bundle.resourcePath ?? ""
@@ -47,9 +70,12 @@ class TemplateMatcher {
                     let itemId = (file as NSString).deletingPathExtension
                     let itemName = formatItemName(itemId)
 
-                    // Pré-calculer le pHash et l'histogramme du template
-                    let phash = computePHash(image: image)
-                    let histogram = computeColorHistogram(image: image)
+                    // Cropper le centre 90% du template (même traitement que les slots)
+                    let croppedImage = cropCenterForTemplate(image, factor: 0.90) ?? image
+
+                    // Pré-calculer le pHash et l'histogramme du template croppé
+                    let phash = computePHash(image: croppedImage)
+                    let histogram = computeColorHistogram(image: croppedImage)
 
                     templates.append(ItemTemplate(
                         id: itemId,
@@ -174,7 +200,7 @@ class TemplateMatcher {
         return 1.0 - (Float(distance) / 64.0)
     }
 
-    // MARK: - Color Histogram
+    // MARK: - Color Histogram (RGB)
 
     /// Calcule l'histogramme de couleurs (64 bins: 4x4x4 RGB)
     /// Indépendant de la taille de l'image (normalisé)
@@ -237,10 +263,10 @@ class TemplateMatcher {
 
     /// Similarité par coefficient de Bhattacharyya (0-1, 1 = identique)
     private func histogramSimilarity(_ hist1: [Float], _ hist2: [Float]) -> Float {
-        guard hist1.count == hist2.count && hist1.count == 64 else { return 0 }
+        guard hist1.count == hist2.count else { return 0 }
 
         var coefficient: Float = 0
-        for i in 0..<64 {
+        for i in 0..<hist1.count {
             coefficient += sqrt(hist1[i] * hist2[i])
         }
 
@@ -248,6 +274,29 @@ class TemplateMatcher {
     }
 
     // MARK: - Match Single Slot
+
+    /// Crop le centre de l'image (90%) pour enlever les bordures
+    private func cropCenter(_ image: NSImage, factor: CGFloat = 0.90) -> NSImage? {
+        guard let cgImage = image.cgImage(forProposedRect: nil, context: nil, hints: nil) else {
+            return nil
+        }
+
+        let width = CGFloat(cgImage.width)
+        let height = CGFloat(cgImage.height)
+
+        let cropWidth = width * factor
+        let cropHeight = height * factor
+        let x = (width - cropWidth) / 2
+        let y = (height - cropHeight) / 2
+
+        let cropRect = CGRect(x: x, y: y, width: cropWidth, height: cropHeight)
+
+        guard let croppedCG = cgImage.cropping(to: cropRect) else {
+            return nil
+        }
+
+        return NSImage(cgImage: croppedCG, size: NSSize(width: croppedCG.width, height: croppedCG.height))
+    }
 
     /// Compare un slot capturé contre tous les templates
     /// Retourne le meilleur match si au-dessus du seuil
@@ -266,9 +315,12 @@ class TemplateMatcher {
             return nil
         }
 
+        // Cropper le centre 90% pour enlever les bordures
+        let imageToAnalyze = cropCenter(slotImage, factor: 0.90) ?? slotImage
+
         // Calculer pHash et histogramme du slot
-        let slotPHash = computePHash(image: slotImage)
-        let slotHistogram = computeColorHistogram(image: slotImage)
+        let slotPHash = computePHash(image: imageToAnalyze)
+        let slotHistogram = computeColorHistogram(image: imageToAnalyze)
 
         // Comparer avec tous les templates
         var matches: [(template: ItemTemplate, pHashScore: Float, histScore: Float, combined: Float)] = []
@@ -277,8 +329,8 @@ class TemplateMatcher {
             let pHashScore = pHashSimilarity(slotPHash, template.pHash)
             let histScore = histogramSimilarity(slotHistogram, template.colorHistogram)
 
-            // Score combiné (pondération ajustable)
-            let combined = pHashScore * 0.4 + histScore * 0.6
+            // Score combiné (pHash plus fiable, donc pondéré plus fort)
+            let combined = pHashScore * 0.6 + histScore * 0.4
 
             matches.append((template, pHashScore, histScore, combined))
         }
