@@ -110,12 +110,13 @@ class ItemDetector: ObservableObject {
 
             let slotImage = NSImage(cgImage: croppedCG, size: NSSize(width: croppedCG.width, height: croppedCG.height))
 
-            // Détecter l'item dans ce slot
-            let matches = await Task.detached(priority: .userInitiated) {
-                TemplateMatcher.shared.findItems(in: slotImage, maxResults: 1)
+            // Détecter l'item dans ce slot (pHash + Histogram)
+            let slotIndex = index
+            let match = await Task.detached(priority: .userInitiated) {
+                TemplateMatcher.shared.findBestMatch(for: slotImage, slotIndex: slotIndex, debugMode: true)
             }.value
 
-            if let bestMatch = matches.first {
+            if let bestMatch = match {
                 print("[ItemDetector] Slot \(index): \(bestMatch.itemName) (\(Int(bestMatch.confidence * 100))%)")
                 allMatches.append(bestMatch)
             }

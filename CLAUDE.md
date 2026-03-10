@@ -4,9 +4,9 @@
 
 App macOS menu bar (SwiftUI) qui assiste Teamfight Tactics via screen recognition :
 - OCR du stage/round
-- Détection des augments (OCR + fallback icônes)
-- Matching d'icônes pour items/composants
-- Calibration par rectangles
+- Détection des items par **pHash + Color Histogram**
+- Calibration par **10 slots individuels** (précision décimale)
+- Capture en **résolution native Retina**
 
 ## Contraintes de sécurité (non négociables)
 
@@ -23,44 +23,57 @@ App macOS menu bar (SwiftUI) qui assiste Teamfight Tactics via screen recognitio
 
 ---
 
+## Branches Git
+
+| Branche | Description | État |
+|---------|-------------|------|
+| `main` | Version stable GitHub (session #2) | Stable |
+| `feature/item-slots-calibration` | Calibration 10 slots + Retina | Mergeable |
+| `feature/item-detection` | **pHash + Histogram** (actuelle) | En cours |
+| `feature/item-detection-sift-orb` | Alternative SIFT/ORB | À tester |
+| `session3-backup` | Backup tentatives session #3 | Archive |
+
+---
+
 ## Workflow de développement
 
 ### Compilation automatique
 Claude compile automatiquement après chaque modification avec `xcodebuild`.
-- **✅ BUILD SUCCEEDED** → Tu peux tester dans Xcode (⌘R)
-- **❌ BUILD FAILED** → Claude corrige l'erreur avant de te demander de tester
-
-### Processus
-1. Claude code et modifie les fichiers
-2. Claude régénère le projet (`xcodegen`)
-3. Claude compile (`xcodebuild`)
-4. Si OK → Tu testes dans Xcode (⌘R)
-5. Si erreur → Claude corrige et recompile
+- **BUILD SUCCEEDED** → Tu peux tester dans Xcode (Cmd+R)
+- **BUILD FAILED** → Claude corrige l'erreur avant de te demander de tester
 
 ### Commandes utiles (Terminal)
 ```bash
-# Régénérer le projet
-cd /Users/micha/web/tft-assistant && xcodegen
+# Compiler
+cd /Users/micha/WEB/PROJECT/tft-assistant
+xcodebuild -project TFTAssistant.xcodeproj -scheme TFTAssistant build
 
 # Ouvrir dans Xcode
-open /Users/micha/web/tft-assistant/TFTAssistant.xcodeproj
+open TFTAssistant.xcodeproj
 
-# Compiler en ligne de commande
-xcodebuild -project TFTAssistant.xcodeproj -scheme TFTAssistant build
+# Voir les images debug
+ls -la ~/Desktop/TFT_Debug/
+
+# Voir la calibration sauvegardée
+cat ~/Library/Application\ Support/TFTAssistant/calibration.json | python3 -m json.tool
+
+# État git
+git branch -a
+git status
 ```
 
 ---
 
 ## CHECKLIST DE PROGRESSION
 
-### Phase 1 : MVP Core
+### Phase 1 : MVP Core (Complète)
 
 #### Étape 0 — Base app
 - [x] 0.1 Créer projet Xcode + structure dossiers
 - [x] 0.2 Menu bar icon (NSStatusBar) fonctionnel
-- [x] 0.3 Popover SwiftUI basique (vide)
+- [x] 0.3 Popover SwiftUI basique
 - [x] 0.4 UserDefaults pour settings de base
-- [x] 0.5 Raccourci clavier global (⌥T)
+- [x] 0.5 Raccourci clavier global (Option+T)
 
 #### Étape 1 — Capture écran
 - [x] 1.1 Demande permission Screen Recording + gestion refus
@@ -68,6 +81,7 @@ xcodebuild -project TFTAssistant.xcodeproj -scheme TFTAssistant build
 - [x] 1.3 Afficher image capturée dans popover (debug)
 - [x] 1.4 Capture continue à 5 fps (scheduler)
 - [x] 1.5 Toggle start/stop capture dans UI
+- [x] 1.6 **Capture Retina native** (×2 backingScaleFactor)
 
 #### Étape 2 — Calibration
 - [x] 2.1 Modèle CalibrationData (struct + Codable)
@@ -76,6 +90,9 @@ xcodebuild -project TFTAssistant.xcodeproj -scheme TFTAssistant build
 - [x] 2.4 UI sélection rectangle zone Items
 - [x] 2.5 Sauvegarde JSON + chargement au démarrage
 - [x] 2.6 Preview des crops en temps réel
+- [x] 2.7 **Calibration 10 slots individuels** avec panneau de saisie précise
+- [x] 2.8 **Ajustement décimal** (flèches: 0.5px, Shift+flèches: 0.1px)
+- [x] 2.9 **Chargement calibration existante** pour édition
 
 #### Étape 3 — OCR Stage/Round
 - [x] 3.1 StageOCR : Vision request basique
@@ -84,15 +101,15 @@ xcodebuild -project TFTAssistant.xcodeproj -scheme TFTAssistant build
 - [x] 3.4 Debounce (stabilisation)
 - [x] 3.5 Score confiance + affichage
 
-### Phase 2 : Détection Items
+### Phase 2 : Détection Items (En cours)
 
 #### Étape 4 — Template matching items
 - [x] 4.1 Chargement templates PNG au démarrage
-- [x] 4.2 TemplateMatcher : algorithme basique
-- [x] 4.3 Gestion multi-scale (Retina)
+- [x] 4.2 TemplateMatcher : **pHash (64-bit) + Color Histogram (64 bins)**
+- [x] 4.3 Pré-calcul des fingerprints au chargement
 - [x] 4.4 Liste items détectés dans UI
-- [x] 4.5 Score confiance par item
-- [ ] 4.6 Réduire les faux positifs (améliorer algorithme)
+- [x] 4.5 Score confiance par item (combiné pH + histogram)
+- [ ] 4.6 Améliorer scores (HSV histogram, cropping centre)
 
 #### Étape 5 — Item Builder
 - [ ] 5.1 Parser items_recipes.json
@@ -120,72 +137,120 @@ xcodebuild -project TFTAssistant.xcodeproj -scheme TFTAssistant build
 #### Étape 8 — Finitions
 - [ ] 8.1 Onglet Status complet (fps, latence, CPU)
 - [ ] 8.2 Onglet Round/Timer
-- [ ] 8.3 Mode debug toggle global
+- [x] 8.3 Mode debug toggle global
 - [ ] 8.4 Optimisations mémoire/CPU
 - [ ] 8.5 Tests multi-résolutions
 
 ---
 
-## Améliorations futures (backlog)
+## Algorithme de détection actuel
 
-- [ ] **Riot Developer Portal** : Explorer l'API Riot pour synchroniser automatiquement les templates à chaque patch, récupérer les stats des items, etc.
-- [ ] **Localisation FR** : Traduire l'interface en français
-- [ ] Support multi-langues (système de localisation SwiftUI)
-- [ ] **Fenêtre réglages raccourcis** : Permettre à l'utilisateur de configurer son propre raccourci clavier
-- [x] **Configurer signing automatique** : ~~Résoudre le problème de mot de passe trousseau~~ → Résolu ! Utiliser "Toujours autoriser" dans le dialogue trousseau
+### pHash + Color Histogram (scale-invariant)
+
+```
+Template (128×128 PNG)           Slot capturé (61×61 px)
+         │                                │
+         ▼                                ▼
+┌─────────────────┐              ┌─────────────────┐
+│ pHash 64-bit    │              │ pHash 64-bit    │
+│ (structure)     │              │ (structure)     │
+└────────┬────────┘              └────────┬────────┘
+         │                                │
+         ▼                                ▼
+┌─────────────────┐              ┌─────────────────┐
+│ Histogram 64    │              │ Histogram 64    │
+│ bins (4×4×4 RGB)│              │ bins (4×4×4 RGB)│
+└────────┬────────┘              └────────┬────────┘
+         │                                │
+         └───────────┬────────────────────┘
+                     ▼
+              Score combiné
+         (40% pHash + 60% Histogram)
+                     │
+                     ▼
+              Seuil > 50% → Match
+```
+
+**Avantages** :
+- Scale-invariant (pas besoin de redimensionner)
+- Rapide (~1ms par comparaison)
+- Robuste aux variations de luminosité
 
 ---
 
-## Dernière session
+## Templates d'items disponibles (10)
 
-**Date** : 5 mars 2026
-**Session** : #2
+| Composants | Consommables |
+|------------|--------------|
+| BF Sword | Reforger |
+| Chain Vest | Magnetic Remover |
+| Giant's Belt | |
+| Needlessly Large Rod | |
+| Negatron Cloak | |
+| Recurve Bow | |
+| Sparring Gloves | |
+| Tear of the Goddess | |
 
-### Ce qui a été implémenté
-- Étapes 1, 2, 3, 4 complètes !
-- Calibration avec overlay de sélection directe sur l'écran
-- OCR Stage/Round fonctionnel (100% confiance)
-- Template matching pour items (10 templates)
-- Gestion Retina (échelles 0.06-0.15 pour templates 128px)
-- Signature Apple Development configurée (plus de demande permission répétée)
+---
 
-### Templates d'items disponibles
-- BF Sword, Chain Vest, Giant's Belt, Needlessly Large Rod
-- Negatron Cloak, Recurve Bow, Sparring Gloves, Tear of the Goddess
-- Reforger, Magnetic Remover (consommables)
+## Historique des sessions
 
-### Fichiers créés/modifiés cette session
-- `Sources/Vision/TemplateMatcher.swift` — Algorithme template matching
-- `Sources/Vision/ItemDetector.swift` — Détection items en continu
-- `Sources/Vision/StageOCR.swift` — OCR du stage/round
-- `Sources/Capture/RegionCropper.swift` — Crop des zones calibrées
-- `Sources/Data/CalibrationStore.swift` — Gestion calibration
-- `Sources/UI/CalibrationOverlay.swift` — Overlay de sélection
-- `Assets/Templates/Items/*.png` — 10 templates d'items
+### Session #5 — 10 mars 2026 (actuelle)
+- Fix pHash (utilisait NSImage.size en points au lieu de CGImage pixels)
+- Détection items **100% correcte** sur test 4 items
+- Recherche algorithmes : pHash, SIFT/ORB, histogrammes
+- Création branche `feature/item-detection-sift-orb` pour alternative
 
-### État actuel
-- **Dernière sous-tâche terminée** : 4.5 (Template matching items)
-- **Prochaine sous-tâche** : 4.6 (Réduire faux positifs) ou 5.1 (Item Builder)
-- **L'app compile** : Oui
-- **L'app est testable** : Oui
+### Session #4 — 7-9 mars 2026
+- Système calibration **10 slots individuels**
+- Capture **Retina native** (3024×1964 au lieu de 1512×982)
+- Panneau saisie précise (valeurs décimales)
+- Fix focus fenêtre calibration (NSApp.activate)
+- Coins redimensionnables pour zones
 
-### Comment tester l'état actuel
+### Session #3 — mars 2026
+- Tentatives détection items (non concluante)
+- Backup dans branche `session3-backup`
+
+### Session #2 — 5 mars 2026
+- Étapes 1-4 complètes
+- Calibration overlay, OCR stage, template matching basique
+- Version stable sur `main`
+
+---
+
+## État actuel
+
+**Date** : 10 mars 2026
+**Branche** : `feature/item-detection`
+
+### Ce qui fonctionne
+- Capture Retina native (3024×1964 pixels)
+- OCR Stage/Round (100% confiance)
+- Calibration 10 slots avec ajustement précis
+- Détection items par pHash + Histogram
+- 4/4 items correctement identifiés dans les tests
+
+### Scores de détection (exemple)
+| Slot | Item | Score |
+|------|------|-------|
+| 0 | BF Sword | 92% |
+| 1 | Magnetic Remover | 77% |
+| 2 | Chain Vest | 91% |
+| 3 | Tear of the Goddess | 81% |
+
+### Prochaines étapes
+1. Améliorer les scores (HSV histogram)
+2. Tester avec plus d'items
+3. Implémenter Item Builder (recettes)
+
+### Comment tester
 1. Ouvrir `TFTAssistant.xcodeproj` dans Xcode
-2. Build & Run (⌘R)
-3. Cliquer sur l'icône manette OU ⌥T
-4. Onglet Settings → Calibrer les zones (Stage, Items)
+2. Build & Run (Cmd+R)
+3. Option+T ou cliquer sur l'icône
+4. Settings → Calibrer les 10 slots
 5. Activer la capture
-6. Voir le stage détecté dans l'onglet Round
-7. Voir les items détectés dans l'onglet Items
-
-### Notes / Problèmes en suspens
-- Quelques faux positifs dans la détection d'items (seuil à 85%)
-- Interface en anglais → prévoir localisation FR
-
-### Pour reprendre
-1. Ouvrir le projet : `/Users/micha/web/tft-assistant/TFTAssistant.xcodeproj`
-2. Lire cette section
-3. Continuer avec l'amélioration de la détection ou l'Item Builder
+6. Voir les items détectés dans l'onglet Items
 
 ---
 
@@ -193,25 +258,44 @@ xcodebuild -project TFTAssistant.xcodeproj -scheme TFTAssistant build
 
 ```
 tft-assistant/
-├── TFTAssistant.xcodeproj      # Généré par xcodegen
-├── project.yml                  # Config xcodegen
+├── TFTAssistant.xcodeproj
 ├── CLAUDE.md                    # Ce fichier
 ├── README.md
+├── SESSION_4.md                 # Notes session #4
 ├── Sources/
 │   ├── App/
 │   │   ├── TFTAssistantApp.swift
 │   │   └── AppDelegate.swift
-│   ├── Capture/                 # À implémenter (étape 1)
-│   ├── Vision/                  # À implémenter (étape 3+)
-│   ├── Data/                    # À implémenter (étape 2+)
+│   ├── Capture/
+│   │   ├── ScreenCaptureManager.swift  # Capture Retina native
+│   │   └── RegionCropper.swift
+│   ├── Vision/
+│   │   ├── TemplateMatcher.swift       # pHash + Histogram
+│   │   ├── ItemDetector.swift          # Détection par slots
+│   │   └── StageOCR.swift
+│   ├── Data/
+│   │   ├── CalibrationData.swift       # ItemSlotsConfig
+│   │   ├── CalibrationStore.swift
+│   │   └── SettingsManager.swift
 │   └── UI/
-│       └── PopoverView.swift
+│       ├── PopoverView.swift
+│       └── CalibrationOverlay.swift    # 10 slots + zones
 ├── Data/
 │   ├── items_recipes.json
-│   ├── augments.json
-│   └── augment_icons.json
+│   └── augments.json
 └── Assets/
     └── Templates/
-        ├── Items/               # Placeholders
-        └── Augments/            # Placeholders
+        └── Items/                       # 10 templates PNG 128×128
 ```
+
+---
+
+## Améliorations futures (backlog)
+
+- [ ] **HSV Histogram** : Meilleure discrimination des couleurs
+- [ ] **SIFT/ORB** : Tester sur branche dédiée
+- [ ] **Riot Developer Portal** : Sync templates auto
+- [ ] **Localisation FR** : Interface en français
+- [ ] **Item Builder** : Afficher recettes possibles
+- [ ] **Augments OCR** : Détection des choix d'augments
+- [x] **Signing automatique** : Résolu (Toujours autoriser)
