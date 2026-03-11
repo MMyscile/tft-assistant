@@ -51,7 +51,7 @@ class TemplateMatcher {
 
         let fileManager = FileManager.default
         let templatesDir = (itemsPath as NSString).appendingPathComponent("Templates/Items")
-        let projectTemplatesDir = "/Users/micha/WEB/PROJECT/tft-assistant/Assets/Templates/Items"
+        let projectTemplatesDir = "/Users/micha/WEB/PROJECT/tft-assistant/Assets/Templates/Items_DDragon"
 
         let searchDir = fileManager.fileExists(atPath: templatesDir) ? templatesDir : projectTemplatesDir
 
@@ -468,6 +468,11 @@ class TemplateMatcher {
 
     var loadedTemplatesCount: Int { templates.count }
     var templateNames: [String] { templates.map { $0.name } }
+
+    /// Récupère l'image d'un template par son ID
+    func templateImage(for itemId: String) -> NSImage? {
+        return templates.first { $0.id == itemId }?.image
+    }
 }
 
 // MARK: - Supporting Types

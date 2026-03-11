@@ -487,10 +487,6 @@ struct ItemsTabView: View {
                         .font(.caption)
                         .foregroundColor(.secondary)
                     Spacer()
-                    if itemDetector.isProcessing {
-                        ProgressView()
-                            .scaleEffect(0.6)
-                    }
                 }
 
                 if itemDetector.detectedItems.isEmpty {
@@ -642,10 +638,18 @@ struct ItemMatchRow: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            // Icône de l'item (si disponible)
-            Image(systemName: "square.fill")
-                .font(.title2)
-                .foregroundColor(.orange)
+            // Miniature de l'item
+            if let itemImage = TemplateMatcher.shared.templateImage(for: match.itemId) {
+                Image(nsImage: itemImage)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 32, height: 32)
+                    .cornerRadius(4)
+            } else {
+                Image(systemName: "square.fill")
+                    .font(.title2)
+                    .foregroundColor(.orange)
+            }
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(match.itemName)
