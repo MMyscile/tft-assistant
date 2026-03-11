@@ -47,3 +47,7 @@ Package.resolved
 *.env
 secrets/
 credentials/
+
+# Fichiers de contexte Claude (locaux)
+CLAUDE.md
+SESSION_*.md
