@@ -74,7 +74,7 @@ struct PopoverView: View {
             }
             .padding()
         }
-        .frame(width: 320, height: 420)
+        .frame(width: 320, height: 450)
     }
 }
 
@@ -352,6 +352,7 @@ struct SettingsTabView: View {
     @ObservedObject private var calibrationStore = CalibrationStore.shared
     @ObservedObject private var screenCalibration = ScreenCalibrationManager.shared
     @State private var showingCalibration = false
+    @AppStorage("overlayEnabled") private var overlayVisible = false
 
     var body: some View {
         VStack(spacing: 12) {
@@ -378,21 +379,38 @@ struct SettingsTabView: View {
 
             Divider()
 
-            // Toggle Capture
-            Toggle(isOn: $settings.captureEnabled) {
-                HStack {
-                    Image(systemName: "camera.fill")
-                    Text("Capture active")
+            // Checkboxes alignées à gauche
+            VStack(alignment: .leading, spacing: 8) {
+                Toggle(isOn: $settings.captureEnabled) {
+                    HStack {
+                        Image(systemName: "camera.fill")
+                        Text("Capture active")
+                    }
                 }
-            }
 
-            // Toggle Debug
-            Toggle(isOn: $settings.debugMode) {
-                HStack {
-                    Image(systemName: "ladybug.fill")
-                    Text("Mode debug")
+                Toggle(isOn: $settings.debugMode) {
+                    HStack {
+                        Image(systemName: "ladybug.fill")
+                        Text("Mode debug")
+                    }
+                }
+
+                Toggle(isOn: $overlayVisible) {
+                    HStack {
+                        Image(systemName: "rectangle.on.rectangle")
+                        Text("Overlay en jeu")
+                    }
+                }
+                .onChange(of: overlayVisible) { newValue in
+                    if newValue {
+                        OverlayWindow.shared.showOverlay()
+                    } else {
+                        OverlayWindow.shared.hideOverlay()
+                    }
                 }
             }
+            .toggleStyle(.checkbox)
+            .frame(maxWidth: .infinity, alignment: .leading)
 
             Divider()
 

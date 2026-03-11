@@ -11,7 +11,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         AppDelegate.shared = self
         setupMenuBar()
         setupHotkey()
+        restoreOverlayState()
         print("[TFTAssistant] App launched successfully")
+    }
+
+    private func restoreOverlayState() {
+        // Restaurer l'overlay si il était activé
+        if UserDefaults.standard.bool(forKey: "overlayEnabled") {
+            OverlayWindow.shared.showOverlay()
+            print("[TFTAssistant] Overlay restored from previous session")
+        }
     }
 
     private func setupHotkey() {

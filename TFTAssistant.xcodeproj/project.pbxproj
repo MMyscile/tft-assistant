@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		129C0462C70ED6DA8B95B5BD /* CalibrationOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1FFD7C77DD2D0BF71213BF6 /* CalibrationOverlay.swift */; };
 		32427DFDD28E629B68FC6D1C /* CalibrationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8B3DE7272D6D574FADAC53A /* CalibrationView.swift */; };
+		45FF0EE933E97CEB2D615ABC /* ItemRecipeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3DB8122645F82CAFB0004B5 /* ItemRecipeService.swift */; };
+		4EBAFFA5733356238DE55415 /* OverlayWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BE9D62FE8E471419AC5E5B3 /* OverlayWindow.swift */; };
 		548945B7861AE9626F7ED1ED /* ScreenCaptureManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105EE41A4C174AB5A0F035AB /* ScreenCaptureManager.swift */; };
 		602E1B60D4D07CAD76F7B98C /* TemplateMatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8D4E3270C016B3F2CBCD0F /* TemplateMatcher.swift */; };
 		7C3FF78BF8C7B202185F0372 /* RegionCropper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 660A4B25DB66B8AE6198603A /* RegionCropper.swift */; };
@@ -33,12 +35,14 @@
 		660A4B25DB66B8AE6198603A /* RegionCropper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegionCropper.swift; sourceTree = "<group>"; };
 		7A0D54A32CDA5EC41F02CB7A /* SettingsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsManager.swift; sourceTree = "<group>"; };
 		87CF62528A65DA19CEB77026 /* PopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopoverView.swift; sourceTree = "<group>"; };
+		8BE9D62FE8E471419AC5E5B3 /* OverlayWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayWindow.swift; sourceTree = "<group>"; };
 		8EC6A8CCD807760C1B981270 /* TFTAssistant.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TFTAssistant.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		91351800488C1A908AD3F805 /* CalibrationStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalibrationStore.swift; sourceTree = "<group>"; };
 		A8B3DE7272D6D574FADAC53A /* CalibrationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalibrationView.swift; sourceTree = "<group>"; };
 		BE6CE03F5F1EEA08D0B35C73 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		CB8550517BC94500B05F26EE /* HotkeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotkeyManager.swift; sourceTree = "<group>"; };
 		D1FFD7C77DD2D0BF71213BF6 /* CalibrationOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalibrationOverlay.swift; sourceTree = "<group>"; };
+		F3DB8122645F82CAFB0004B5 /* ItemRecipeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemRecipeService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -47,6 +51,7 @@
 			children = (
 				D1FFD7C77DD2D0BF71213BF6 /* CalibrationOverlay.swift */,
 				A8B3DE7272D6D574FADAC53A /* CalibrationView.swift */,
+				8BE9D62FE8E471419AC5E5B3 /* OverlayWindow.swift */,
 				87CF62528A65DA19CEB77026 /* PopoverView.swift */,
 			);
 			path = UI;
@@ -104,6 +109,7 @@
 			children = (
 				3655485CACD8F31A4ACECB04 /* CalibrationData.swift */,
 				91351800488C1A908AD3F805 /* CalibrationStore.swift */,
+				F3DB8122645F82CAFB0004B5 /* ItemRecipeService.swift */,
 				7A0D54A32CDA5EC41F02CB7A /* SettingsManager.swift */,
 			);
 			path = Data;
@@ -178,6 +184,8 @@
 				32427DFDD28E629B68FC6D1C /* CalibrationView.swift in Sources */,
 				BF8C064461F8DD3D7CD9AD0F /* HotkeyManager.swift in Sources */,
 				A9194761E7C3575277ED313C /* ItemDetector.swift in Sources */,
+				45FF0EE933E97CEB2D615ABC /* ItemRecipeService.swift in Sources */,
+				4EBAFFA5733356238DE55415 /* OverlayWindow.swift in Sources */,
 				997F5510EC7F0BB6B4A2769F /* PopoverView.swift in Sources */,
 				7C3FF78BF8C7B202185F0372 /* RegionCropper.swift in Sources */,
 				548945B7861AE9626F7ED1ED /* ScreenCaptureManager.swift in Sources */,
